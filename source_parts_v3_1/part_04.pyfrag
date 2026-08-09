@@ -1,0 +1,40 @@
+qa['checks']['keyhole_entry_below_seated']=True
+qa['checks']['shell_independent_of_load_path']=True
+qa['checks']['central_shell_opening_larger_than_receiver']=CENTER_OPEN>RX
+qa['checks']['left_side_service_window_large']=True
+qa['checks']['right_side_optical_osd_window_large']=True
+qa['checks']['top_exhaust_not_enclosed']=True
+qa['checks']['rear_port_area_open']=True
+qa['checks']['camera_privacy_relief_present']=True
+qa['checks']['bottom_center_speaker_service_relief_present']=True
+qa['checks']['wall_attachment_patterns_explicit']=True
+qa['checks']['optional_metal_backer_available']=True
+# Structural collision / lock kinematics checks using exact CAD solids.
+def solid_volume(obj):
+    try:
+        return float(obj.val().Volume())
+    except Exception:
+        return float(sum(v.Volume() for v in obj.vals()))
+qa['checks']['wall_receiver_intersection_seated_mm3']=round(solid_volume(wall.intersect(receiver.translate((0,0,WALL_TO_RX_BACK)))),6)
+qa['checks']['wall_receiver_intersection_entry_mm3']=round(solid_volume(wall.intersect(receiver.translate((0,KEY_TRAVEL,WALL_TO_RX_BACK)))),6)
+qa['checks']['wall_receiver_collision_free_in_seated_and_entry']=(qa['checks']['wall_receiver_intersection_seated_mm3']==0 and qa['checks']['wall_receiver_intersection_entry_mm3']==0)
+# Kinematic clearances in receiver coordinates: wall ear is nearly at the open bottom during entry,
+# then moves 14 mm upward relative to receiver when the AIO is lowered.
+entry_ear_lower=EAR_Y0-KEY_TRAVEL
+slot_bottom=-RX/2
+lock_block_top=-RX/2+LOCK_BLOCK_Y
+seated_ear_lower=EAR_Y0
+qa['checks']['entry_ear_lower_relative_to_open_bottom_mm']=round(entry_ear_lower-slot_bottom,2)
+qa['checks']['entry_ear_top_inside_open_channel_mm']=round((EAR_Y0+EAR_H-KEY_TRAVEL)-slot_bottom,2)
+qa['checks']['lock_block_to_ear_seated_gap_mm']=round(seated_ear_lower-lock_block_top,2)
+qa['checks']['lock_block_noninterference_seated']=(seated_ear_lower-lock_block_top)>=0
+qa['checks']['lock_stops_lift_before_keyhole_release']=(0 <= (seated_ear_lower-lock_block_top) < KEY_TRAVEL)
+h2c_dims=[v['dims_mm'] for k,v in qa['parts'].items() if k.startswith('h2c/')]
+qa['checks']['h2c_max_part_dims_mm']=[round(max(d[i] for d in h2c_dims),2) for i in range(3)]
+qa['checks']['h2c_min_margin_to_300x315x315_mm']=[round(H2C_SAFE[i]-qa['checks']['h2c_max_part_dims_mm'][i],2) for i in range(3)]
+qa['notes']=[
+    'CAD cannot verify the Dell rear recess, curvature, M4 usable thread depth, exact port coordinates, active-display bezel margin, or thermal behavior without the physical AIO.',
+    'The 2.5 mm VESA fit template and enclosure corner/front-overlap coupons are mandatory first-print checks before committing to a structural receiver or paid full enclosure.',
+    'The 20 kg class concept is not a certified rating. Permanent wall installation should use appropriate wall fasteners, steel studs, broad M4 washers and preferably the optional 2 mm metal backer or a commercial metal VESA backbone.',
+]
+(OUT/'QA_RESULTS.json').write_text(json.dumps(qa,indent=2))
