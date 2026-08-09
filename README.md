@@ -1,123 +1,112 @@
-# Dell OptiPlex 7450 AIO full enclosure — V3
+# Dell OptiPlex 7450 AIO Full Enclosure — V3.1 Clearance-First
 
 > [!IMPORTANT]
-> **AI-authorship disclosure:** This project was written and CAD-generated with **OpenAI ChatGPT (GPT-5.6 Sol)** from user-provided requirements, constraints, photographs, and iterative feedback. The documentation, parametric CAD source, exported geometry, validation scripts/results, and design recommendations are AI-generated. It is **not a certified engineering product** and has not been physically validated on the target Dell OptiPlex 7450 AIO unless a section explicitly says otherwise. Perform the included fit checks and use appropriate engineering judgment before supporting equipment from a wall.
+> **AI-authorship disclosure:** This CAD project and its documentation were generated with **OpenAI ChatGPT (GPT-5.6 Sol)** from Dell specifications, user-supplied photographs, independent product photographs, and iterative requirements. The CAD source, exported geometry, QA scripts/results, and engineering recommendations are AI-generated. This is **not a certified engineering product** and has not been physically validated on every Dell OptiPlex 7450 AIO.
 
-V3 is a manufacturing-method-aware redesign of a complete protective enclosure and wall-mount system for the Dell OptiPlex 7450 AIO. It provides both an efficient large-format SLS/MJF layout and an H2C-compatible FDM layout from the same parametric CAD.
+V3.1 is the **pre-purchase / clearance-first** revision. It intentionally gives up a small amount of cosmetic tightness to remove dependence on unpublished Dell dimensions while retaining the full enclosure concept, wall mounting, H2C compatibility, and efficient SLS/MJF production.
+
+## What changed from V3
+
+- Dell receiver reduced from **138 × 138 mm to 128 × 128 mm**.
+- Receiver remains **10 mm structurally thick** with 6 mm Dell-side standoffs.
+- VESA remains the official **100 × 100 mm M4** pattern.
+- Steel wall-stud/keyhole pattern widened to **84 × 56 mm**.
+- Bottom-center receiver opening widened to **56 mm** and extended to the edge so the stand latch/mechanism is not trapped behind a flat plate.
+- Positive anti-lift geometry corrected: seated clearance is **1.0 mm**, with no block/ear intersection, while only 1 mm of lift is available before the lock stops motion versus 14 mm required to release the keyholes.
+- Enclosure body clearance increased to **5 mm per side** (10 mm total X/Y).
+- Rear/depth clearance increased to **8 mm** beyond Dell's maximum published chassis depth.
+- Front retention overlap reduced to **2 mm** per edge.
+- Central shell exclusion increased to **190 × 190 mm**.
+- Side I/O, optical-drive/control, rear-port and top-exhaust regions remain broadly open instead of depending on guessed port coordinates.
+- All H2C parts remain inside the conservative **300 × 315 × 315 mm** design envelope; largest generated H2C part is about **295.62 × 210.45 × 74.3 mm**.
+
+## Published Dell basis
+
+- Chassis: **575.24 × 392.90 × 63.50 mm maximum published depth**.
+- VESA: **FDMI MIS-D 100 × 100 mm, M4**.
+- Minimum wall clearance: **20 mm**.
+- V3.1 nominal Dell-rear-to-wall distance: **52.3 mm**.
+- V3.1 nominal printed-shell-to-wall clearance: **41.5 mm**.
+
+## Photo-derived rear-bay cross-check
+
+The supplied near-orthogonal rear photograph contains the same four VESA threaded centers whose spacing is independently published as 100 mm. Using that known spacing as an image scale gives an approximate visible stand bay of **145.5–149.3 mm wide** and about **150.9 mm high**.
+
+This is not metrology-grade because of perspective and edge ambiguity, but it gives the 128 mm receiver roughly **8.7–10.7 mm lateral clearance per side** and roughly **11.5 mm top/bottom clearance** against the visible bay boundary. The new 56 mm open-bottom notch additionally avoids the prominent stand latch visible below the lower M4 pair.
+
+Independent rear photographs and genuine Dell 7450VESA bracket photographs corroborate the same bay/latch/bracket arrangement, although no dimensioned engineering drawing of the exterior recess or usable M4 thread depth was found. See `ONLINE_SOURCE_NOTES.md` and `REVALIDATION_V3_1.md`.
 
 ## Repository layout
+
+Current source/build files:
+
+- `source_parts_v3_1/` — chunked canonical V3.1 CadQuery source used by CI.
+- `build_v3_1.py` — reconstructs `CAD_SOURCE_make_v3_1.py` and builds the CAD.
+- `CAD_SOURCE_make_v3_1.py` — generated complete source file after CI runs.
+- `.github/workflows/generate-cad.yml` — automatically regenerates production files.
 
 Generated production files are committed under `generated/`:
 
 - `generated/sls_mjf/` — **2 rear halves + 2 front halves** for large-format SLS/MJF PA12.
-- `generated/h2c/` — **4 rear quadrants + 4 front quadrants** kept inside a conservative **300 × 315 × 315 mm** envelope.
-- `generated/universal/` — structural receiver, wall plate, positive anti-lift lock and seam joiners used with either process.
-- `generated/fit_checks/` — inexpensive validation templates/coupons that should be printed first.
+- `generated/h2c/` — **4 rear quadrants + 4 front quadrants** for H2C-class FDM.
+- `generated/universal/` — structural receiver, wall plate, anti-lift block and seam joiners.
+- `generated/fit_checks/` — inexpensive validation templates/coupons.
 - `generated/optional_metal/` — optional 2 mm receiver backer in STL/STEP/DXF form.
-- `generated/case_reference_assembly.step` — full-case reference assembly.
-- `generated/wall_interface_entry.step` and `generated/wall_interface_seated.step` — wall-interface kinematic references.
+- `generated/case_reference_assembly.step` — enclosure reference assembly.
+- `generated/wall_interface_entry.step` / `generated/wall_interface_seated.step` — wall-interface kinematic references.
 
-The parametric generator is assembled as `CAD_SOURCE_make_v3.py`. `build_v3.py` reconstructs it from `source_parts/` and regenerates the production files. GitHub Actions runs the same build automatically when the CAD source changes.
+## Manufacturing paths
 
-### Rebuild locally
+### H2C / large-format FDM
 
-```bash
-python -m pip install -r requirements.txt
-python build_v3.py
-```
+Use the `generated/h2c/` set. The enclosure quadrants are sized to stay under a conservative 300 × 315 × 315 mm envelope. A single nozzle/material is sufficient. See `H2C_PRINT_PLAN.md`.
 
-The regenerated files are written to `generated/`.
+### SLS / MJF
 
-## Verified Dell basis
+Use the `generated/sls_mjf/` set for the lowest assembly count: two rear shell halves and two front-retainer halves. PA12 or comparable functional nylon is preferred. See `SLS_MJF_PLAN.md`.
 
-- Published chassis envelope used: **575.24 × 392.90 × 63.50 mm**.
-- VESA: **100 × 100 mm, M4**.
-- Dell minimum wall clearance basis: **20 mm**; V3 nominally places the Dell rear surface about **52.3 mm** from the wall before accounting for real recess curvature.
-- The enclosure projects about 6.8 mm behind the published Dell maximum rear surface, leaving a nominal shell-to-wall gap of about **45.5 mm**.
+## Structural system
 
-## Structural receiver — corrections carried into V3
+The printed enclosure is deliberately **not the primary wall-load path**. The Dell's VESA connection transfers through the 128 × 128 × 10 mm receiver to four steel M8 studs and the wall plate.
 
-The Dell-side receiver was rebuilt rather than inherited from V1:
+The receiver includes:
 
-- **138 × 138 mm** main outline, under the requested ~140 × 140 envelope.
-- **10 mm uniform structural thickness** at the steel-stud/keyhole load path.
-- Four **100 × 100 M4** Dell holes.
-- Flat wall-facing washer seats sized for approximately **20 mm OD M4 fender washers**; no deep counterbores weaken the receiver.
-- Four broad steel-stud keyholes arranged **76 × 56 mm** using **M8 steel studs**. Entry circles are below the final seated positions; the receiver lowers **14 mm** to seat.
-- Four **6 mm Dell-side standoffs**, keeping stud hardware away from the Dell rear cover.
-- Open central relief for stand latch/recess avoidance.
-- **Positive anti-lift system:** a wall ear travels in the receiver's open-bottom center channel. After seating, insert the positive anti-lift lock block and secure it with one M5 screw. The block physically closes the release path below the wall ear, so lift-off requires removing the screw and block first.
+- 100 × 100 mm M4 Dell interface;
+- approximately 20 mm OD fender-washer bearing areas;
+- 84 × 56 mm four-stud pattern;
+- 14 mm gravity seating travel;
+- broad open-bottom latch relief;
+- removable positive anti-lift block secured by an M5 fastener.
 
-The lock block is separate on purpose: it keeps the keyhole entry path fully open during installation and removes the geometry contradiction present in the early design.
+For a permanent installation, the optional 2 mm metal receiver backer or a commercial metal VESA backbone is strongly preferred.
 
-## Mandatory fit-check sequence
+## Fit checks
 
-1. Print `generated/fit_checks/vesa_recess_fit_template_2p5mm.stl` in cheap PLA.
-2. Loosely bolt it to all four Dell M4 positions with washers. Confirm the **entire 138 × 138 outline** clears the molded recess, latch and casing. Do not force it flat.
-3. Verify the central relief clears the latch/mechanism.
-4. Print `generated/fit_checks/m8_keyhole_and_insert_coupon.stl` and test the exact M8 washer/head stack and any brass inserts you plan to use.
-5. Print `generated/fit_checks/enclosure_corner_depth_coupon.stl` and `generated/fit_checks/enclosure_front_corner_coupon.stl` and check edge/depth clearance.
-6. Use `generated/fit_checks/front_overlap_3_4_5mm_coupon.stl` to confirm that 4 mm front retention does not intrude into the active display, speaker grille or controls.
-7. Only after these checks pass should the paid SLS/MJF shell or structural H2C parts be ordered/printed.
+The design is intentionally much less dependent on unpublished Dell geometry, but the repository still includes cheap validation parts:
 
-## Wall attachment
+1. `generated/fit_checks/vesa_recess_fit_template_2p5mm.stl`
+2. `generated/fit_checks/m8_keyhole_and_insert_coupon.stl`
+3. `generated/fit_checks/enclosure_corner_depth_coupon.stl`
+4. `generated/fit_checks/enclosure_front_corner_coupon.stl`
+5. `generated/fit_checks/front_overlap_1_2_3mm_coupon.stl`
+6. `generated/fit_checks/wall_drill_template_2mm.stl`
 
-`generated/universal/wall_plate_4xM8_stud.stl` is 220 × 160 mm and explicitly contains:
+The **M4 screw length / usable thread depth remains unpublished**. Do not choose final screw length solely from this model.
 
-- timber-stud centerline holes at y = -60, 0, +60 mm;
-- masonry pattern corners at **190 × 120 mm**;
-- four M8 carriage-bolt / steel-stud bosses matching the 76 × 56 mm receiver interface.
+## QA status
 
-Use wall fasteners appropriate to the actual substrate. Printed-plastic strength does not compensate for inadequate drywall/plasterboard anchors.
+See `QA_RESULTS.json` and `REVALIDATION_V3_1.md`.
 
-## Full enclosure improvements and revalidation
+Current generated V3.1 checks include:
 
-The printed enclosure is intentionally **not part of the AIO's structural wall load path**. It traps/protects the chassis while the Dell's metal VESA interface carries the computer.
+- receiver outline ≤140 mm: PASS;
+- structural receiver thickness 9–10 mm: PASS;
+- nominal shell-to-wall clearance ≥20 mm: PASS;
+- wall/receiver collision in seated state: **0 mm³**;
+- wall/receiver collision in entry state: **0 mm³**;
+- positive lock collision-free when seated: PASS;
+- lock prevents lift-off before 14 mm keyhole release travel: PASS;
+- all exported STL meshes watertight: PASS;
+- all H2C production parts inside the conservative envelope: PASS.
 
-- 3.0 mm perimeter shell walls and 2.8 mm rear bands are efficient for SLS/MJF and remain straightforward for FDM.
-- Rear center has a **184 × 184 mm structural avoidance opening**, much larger than the 138 mm receiver.
-- Rear surface is mostly open instead of being a solid sheet with guessed ventilation slots.
-- Left side has a broad service opening for the documented card reader, USB-C, USB and headset connections.
-- Right side has a broad service opening for the documented optical drive, OSD buttons and power controls.
-- Top rear is broadly open so the long exhaust region is not boxed in.
-- Rear remains open around the power/network/USB/HDMI/DisplayPort/audio region.
-- Top-center front retainer is relieved for camera/microphones/privacy latch.
-- Bottom-center front retainer is broadly relieved to reduce the risk of blocking speakers/service features.
-- Enclosure seams are nonstructural and use simple M3 joiner bars.
-
-## H2C notes
-
-The H2C production set uses four rear quadrants and four front quadrants. Use a **single nozzle/material for each component**; no multi-tool printing is required. For FDM, the shell should be treated as a low-infill enclosure, while the receiver and wall plate should use a creep-resistant engineering material and conservative structural settings.
-
-The CAD QA records the largest H2C enclosure part as approximately **293.12 × 207.95 × 70.3 mm**, within the project's conservative 300 × 315 × 315 mm target. Verify the actual service's selected H2C tool/nozzle mode in the slicer before committing a batch.
-
-See `H2C_PRINT_PLAN.md` and `generated/QA_RESULTS.json`.
-
-## SLS/MJF notes
-
-The SLS/MJF set minimizes seams: two rear halves and two front halves. The full-height halves are approximately 416 mm long, so the manufacturing service must confirm its build envelope and tolerance for long PA12 parts.
-
-See `SLS_MJF_PLAN.md`.
-
-## Hardware summary
-
-- Dell: 4 × M4 VESA screws of **physically verified length** + ~20 mm OD fender washers.
-- Wall interface: 4 × M8 steel carriage bolts/studs, M8 washers and locking nuts.
-- Positive lock: 1 × M5 screw + M5 square nut for the removable anti-lift block.
-- Enclosure: M3 screws/washers/nuts for seams; M3 threaded inserts or service-selected equivalent for front retainer tabs.
-- Wall fasteners: substrate-specific, not included in the CAD assumption.
-- Optional: 2 mm aluminum receiver backer and a secondary steel safety tether.
-
-See `BOM.md` for the concise hardware list.
-
-## Validation status
-
-Automated CAD checks are published in `QA_RESULTS.json` and regenerated in `generated/QA_RESULTS.json`. They include watertightness, H2C bounding-envelope checks, receiver dimensions, wall clearance, collision checks for the entry/seated wall interface and positive-lock travel.
-
-This does **not** constitute a certified load rating. Proof-load the assembled wall interface with a nonvaluable dead load before installing the computer, and use a secondary safety tether for a permanent installation.
-
-## Still requires physical verification
-
-Published specifications do **not** provide the stand-recess width/depth, usable M4 thread depth, exact rear curvature, exact port coordinates, optical-drive protrusion, active-screen edge location, or thermal temperatures inside a close enclosure. V3 addresses these unknowns with avoidance openings and fit coupons, but they cannot be truthfully declared solved until the actual AIO is checked.
-
-See `MEASUREMENT_CHECKLIST.md` before ordering an expensive final enclosure.
+These are CAD/mesh checks, not certification of wall substrate, fasteners, printed-material strength, creep life, thermal behavior, or manufacturing variation in a used AIO.
