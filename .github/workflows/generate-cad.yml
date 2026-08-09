@@ -34,6 +34,13 @@ jobs:
       - name: Generate V3.1 STL, STEP and DXF outputs
         run: python build_v3_1.py
 
+      - name: Upload complete generated CAD artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v3-1-generated-cad
+          path: generated/
+          if-no-files-found: error
+
       - name: Commit generated CAD
         run: |
           git config user.name "github-actions[bot]"
