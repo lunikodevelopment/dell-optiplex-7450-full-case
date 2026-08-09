@@ -1,0 +1,100 @@
+    'rear_top_left': clip(shell,-OUT_W/2-M,0,0,OUT_H/2+M),
+    'rear_top_right': clip(shell,0,OUT_W/2+M,0,OUT_H/2+M),
+    'rear_bottom_left': clip(shell,-OUT_W/2-M,0,-OUT_H/2-M,0),
+    'rear_bottom_right': clip(shell,0,OUT_W/2+M,-OUT_H/2-M,0),
+    'front_top_left': clip(front,-OUT_W/2-M,0,0,OUT_H/2+M,z0=-10,z1=10),
+    'front_top_right': clip(front,0,OUT_W/2+M,0,OUT_H/2+M,z0=-10,z1=10),
+    'front_bottom_left': clip(front,-OUT_W/2-M,0,-OUT_H/2-M,0,z0=-10,z1=10),
+    'front_bottom_right': clip(front,0,OUT_W/2+M,-OUT_H/2-M,0,z0=-10,z1=10),
+}
+# SLS/MJF: two vertical halves for far lower assembly count; large-format provider must confirm machine envelope.
+sls_parts={
+    'rear_left_half': clip(shell,-OUT_W/2-M,0,-OUT_H/2-M,OUT_H/2+M),
+    'rear_right_half': clip(shell,0,OUT_W/2+M,-OUT_H/2-M,OUT_H/2+M),
+    'front_left_half': clip(front,-OUT_W/2-M,0,-OUT_H/2-M,OUT_H/2+M,z0=-10,z1=10),
+    'front_right_half': clip(front,0,OUT_W/2+M,-OUT_H/2-M,OUT_H/2+M,z0=-10,z1=10),
+}
+
+# ---------------- Fit-check coupons ----------------
+# Corner/depth coupon checks internal XY clearance, depth, rear clearance and front-lip overlap cheaply.
+# 45x45 corner section from full shell + corresponding front corner, shortened to 35 mm depth region at front/rear represented by rails.
+corner_shell=clip(shell,-OUT_W/2-M,-OUT_W/2+48,-OUT_H/2-M,-OUT_H/2+48,z0=-2,z1=SHELL_D+2)
+corner_front=clip(front,-OUT_W/2-M,-OUT_W/2+48,-OUT_H/2-M,-OUT_H/2+48,z0=-10,z1=5)
+# Simple 3 mm front-overlap gauge variants 3/4/5 mm in one coupon bar
+lip_coupon=cq.Workplane('XY').box(70,24,3,centered=(True,True,False))
+for i,ov in enumerate((3.0,4.0,5.0)):
+    x=-24+i*24
+    slot=cq.Workplane('XY').center(x,0).rect(12,12).extrude(4).translate((0,0,-0.5))
+    lip_coupon=lip_coupon.cut(slot)
+    # marker notch depth corresponds to overlap
+    lip_coupon=lip_coupon.cut(cq.Workplane('XY').center(x,-12+ov/2).rect(6,ov).extrude(4).translate((0,0,-0.5)))
+
+# Optional flat 2 mm aluminum backer geometry (laser-cut/CNC), matching receiver load interfaces.
+backer=plate(132,132,2.0,3)
+for x in (-50,50):
+    for y in (-50,50):
+        backer=backer.cut(cq.Workplane('XY').center(x,y).circle(2.3).extrude(4).translate((0,0,-1)))
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        ey=y-KEY_TRAVEL
+        big=cq.Workplane('XY').center(x,ey).circle(KEY_BIG/2).extrude(4).translate((0,0,-1))
+        slot=cq.Workplane('XY').center(x,(ey+y)/2).rect(KEY_SLOT,KEY_TRAVEL).extrude(4).translate((0,0,-1))
+        end=cq.Workplane('XY').center(x,y).circle(KEY_SLOT/2).extrude(4).translate((0,0,-1))
+        backer=backer.cut(big.union(slot).union(end))
+backer=backer.cut(cq.Workplane('XY').center(0,(-66+LOCK_SLOT_TOP)/2).rect(LOCK_SLOT_W,LOCK_SLOT_TOP+66).extrude(4).translate((0,0,-1)))
+
+# ---------------- Export ----------------
+universal=OUT/'universal'
+fitdir=OUT/'fit_checks'
+export_part(receiver,'vesa_receiver_138x138_10mm',universal)
+export_part(wall,'wall_plate_4xM8_stud',universal)
+export_part(lock_block,'positive_anti_lift_lock_block',universal)
+export_part(drill,'wall_drill_template_2mm',fitdir)
+export_part(fit,'vesa_recess_fit_template_2p5mm',fitdir)
+export_part(coupon,'m8_keyhole_and_insert_coupon',fitdir)
+export_part(corner_shell,'enclosure_corner_depth_coupon',fitdir)
+export_part(corner_front,'enclosure_front_corner_coupon',fitdir)
+export_part(lip_coupon,'front_overlap_3_4_5mm_coupon',fitdir)
+export_part(joiner_long,'seam_joiner_180mm',universal)
+export_part(joiner_short,'seam_joiner_130mm',universal)
+export_part(backer,'optional_2mm_receiver_backer',OUT/'optional_metal')
+# DXF backer face for laser cutting
+try:
+    exporters.export(backer.faces('>Z'),str(OUT/'optional_metal'/'optional_2mm_receiver_backer.dxf'))
+except Exception:
+    pass
+for n,s in h2c_parts.items(): export_part(s,n,OUT/'h2c')
+for n,s in sls_parts.items(): export_part(s,n,OUT/'sls_mjf')
+
+# Export full geometry STEP references
+exporters.export(shell,str(OUT/'universal'/'full_rear_shell_reference.step'))
+exporters.export(front,str(OUT/'universal'/'full_front_retainer_reference.step'))
+
+# Assemblies: shell/front + receiver proxy at centered position; wall assembly separate.
+case_assy=cq.Assembly(name='Dell_7450_Full_Case_V3')
+case_assy.add(shell,name='rear_shell')
+case_assy.add(front,name='front_retainer')
+# receiver in approximate Dell rear plane at z=AIO_D-RT? This is a reference, not exact curvature.
+case_assy.add(receiver.translate((0,0,AIO_D-RT-DELL_STANDOFF)),name='vesa_receiver_reference')
+case_assy.save(str(OUT/'case_reference_assembly.step'))
+wall_assy=cq.Assembly(name='Dell_7450_Wall_Interface_V3')
+wall_assy.add(wall,name='wall_plate')
+wall_assy.add(receiver.translate((0,0,WALL_TO_RX_BACK)),name='receiver_seated')
+wall_assy.add(lock_block.translate((0,0,WALL_TO_RX_BACK)),name='anti_lift_lock_block')
+wall_assy.save(str(OUT/'wall_interface_seated.step'))
+# entry position receiver is 14 mm higher; lock block omitted until seated
+entry=cq.Assembly(name='Dell_7450_Wall_Interface_Entry_V3')
+entry.add(wall,name='wall_plate')
+entry.add(receiver.translate((0,KEY_TRAVEL,WALL_TO_RX_BACK)),name='receiver_entry')
+entry.save(str(OUT/'wall_interface_entry.step'))
+
+# ---------------- QA via trimesh ----------------
+import trimesh
+qa={'design_basis':{},'parts':{},'checks':{},'notes':[]}
+def inspect_dir(folder,tag,h2c_check=False):
+    for p in sorted(folder.glob('*.stl')):
+        m=trimesh.load_mesh(p,process=True)
+        d=(m.bounds[1]-m.bounds[0]).tolist()
+        qa['parts'][f'{tag}/{p.name}']={
+            'dims_mm':[round(float(v),2) for v in d],
+            'watertight':bool(m.is_watertight),
