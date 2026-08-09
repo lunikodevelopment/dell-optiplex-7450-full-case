@@ -1,0 +1,110 @@
+import cadquery as cq
+from cadquery import exporters
+from pathlib import Path
+import json, math, shutil, zipfile, os
+
+OUT=Path('/mnt/data/dell_7450_full_case_v3_1_clearance')
+if OUT.exists(): shutil.rmtree(OUT)
+(OUT/'universal').mkdir(parents=True)
+(OUT/'h2c').mkdir()
+(OUT/'sls_mjf').mkdir()
+(OUT/'fit_checks').mkdir()
+(OUT/'optional_metal').mkdir()
+
+# ---------------- Verified design basis ----------------
+AIO_W=575.24
+AIO_H=392.90
+AIO_D=63.50   # max published depth (non-touch)
+VESA=100.0
+# Enclosure clearances, conservative until unit is physically measured
+XY_CLEAR=5.00
+DEPTH_CLEAR=8.0
+SHELL_T=3.0
+REAR_SKIN=2.8
+OUT_W=AIO_W+2*XY_CLEAR+2*SHELL_T       # 586.24
+OUT_H=AIO_H+2*XY_CLEAR+2*SHELL_T       # 403.90
+INNER_W=AIO_W+2*XY_CLEAR
+INNER_H=AIO_H+2*XY_CLEAR
+SHELL_D=AIO_D+DEPTH_CLEAR+REAR_SKIN    # 70.3
+REAR_Z=SHELL_D-REAR_SKIN
+REAR_BAND=20.0
+CENTER_OPEN=190.0
+FRONT_T=4.5
+FRONT_OVERLAP=2.0
+
+# Structural receiver: keep the Dell-side outline under 140 x 140 mm
+RX=128.0
+RT=10.0
+DELL_STANDOFF=6.0
+M4_CLEAR=4.6
+M4_WASHER_OD=20.0
+# Four steel-stud positions; deliberately distinct from VESA corners
+STUD_X=42.0
+STUD_Y=28.0
+KEY_BIG=22.0      # M8 washer/head entry clearance
+KEY_SLOT=8.8      # M8 shank clearance
+KEY_TRAVEL=14.0
+# Wall system
+WALL_W=220.0
+WALL_H=160.0
+WALL_T=8.0
+BOSS_OD=24.0
+BOSS_H=28.0
+STUD_CLEAR=8.6
+CARRIAGE_SQ=8.7
+CARRIAGE_HEAD_D=20.0
+CARRIAGE_RECESS=4.5
+STUD_CAPTURE_GAP=10.6
+# nominal receiver wall-facing plane is just ahead of boss face; printed plate occupies capture gap
+WALL_TO_RX_BACK = WALL_T+BOSS_H+0.3
+WALL_TO_DELL_REAR = WALL_TO_RX_BACK+RT+DELL_STANDOFF
+SHELL_TO_WALL_CLEAR = WALL_TO_DELL_REAR-(SHELL_D-AIO_D)
+
+# H2C conservative universal envelope: intentionally <=300x315x315,
+# so it is safe even when a tool mode exposes less than the maximum nominal X range.
+H2C_SAFE=(300.0,315.0,315.0)
+
+
+def plate(w,h,t,fillet=4):
+    s=cq.Workplane('XY').box(w,h,t,centered=(True,True,False))
+    try: s=s.edges('|Z').fillet(fillet)
+    except: pass
+    return s
+
+def cut_cylinder_axis(shape, pnt, direction, dia, length):
+    c=cq.Solid.makeCylinder(dia/2,length,cq.Vector(*pnt),cq.Vector(*direction))
+    return shape.cut(c)
+
+def add_cylinder_axis(shape,pnt,direction,dia,length):
+    c=cq.Solid.makeCylinder(dia/2,length,cq.Vector(*pnt),cq.Vector(*direction))
+    return shape.union(c)
+
+def export_part(shape,name,folder,step=True):
+    stl=folder/f'{name}.stl'
+    exporters.export(shape,str(stl),tolerance=0.08,angularTolerance=0.12)
+    if step:
+        exporters.export(shape,str(folder/f'{name}.step'))
+    return stl
+
+# ---------------- Structural Dell receiver ----------------
+receiver=plate(RX,RX,RT,5)
+# Central latch/recess avoidance window: big enough to avoid the central mechanism without approaching VESA holes.
+relief=cq.Workplane('XY').rect(52,42).extrude(RT+2).translate((0,2,-1))
+try: relief=relief.edges('|Z').fillet(6)
+except: pass
+receiver=receiver.cut(relief)
+# M4 100x100 holes; no counterbore so broad fender washers bear on full 10 mm thickness.
+for x in (-VESA/2,VESA/2):
+    for y in (-VESA/2,VESA/2):
+        receiver=receiver.cut(cq.Workplane('XY').center(x,y).circle(M4_CLEAR/2).extrude(RT+2).translate((0,0,-1)))
+# 6 mm Dell-side stand-offs around each M4 point, OD 18; recut holes.
+for x in (-VESA/2,VESA/2):
+    for y in (-VESA/2,VESA/2):
+        receiver=receiver.union(cq.Workplane('XY').center(x,y).circle(9).extrude(RT+DELL_STANDOFF))
+        receiver=receiver.cut(cq.Workplane('XY').center(x,y).circle(M4_CLEAR/2).extrude(RT+DELL_STANDOFF+2).translate((0,0,-1)))
+# Four M8 steel-stud keyholes: entry circle below seated shank position.
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        ey=y-KEY_TRAVEL
+        big=cq.Workplane('XY').center(x,ey).circle(KEY_BIG/2).extrude(RT+2).translate((0,0,-1))
+        # narrow path from entry center upward to seated center
