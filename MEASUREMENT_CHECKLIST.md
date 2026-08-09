@@ -1,18 +1,18 @@
-# Physical measurement checklist before final production
+# V3.1 optional physical verification checklist
 
-Do not skip the fit templates. Record these once the AIO arrives:
+V3.1 is intentionally designed to reduce dependence on unpublished Dell dimensions. These checks are still useful if the AIO is available before ordering a final production enclosure:
 
-- center-to-center VESA spacing (expected 100 x 100 mm);
-- usable M4 thread depth and safe screw length;
+- center-to-center VESA spacing (published expectation: 100 × 100 mm);
+- usable M4 thread depth and final screw length;
 - stand/VESA recess maximum width and height;
-- recess depth from surrounding rear cover to the metal threaded inserts;
+- recess depth from surrounding rear cover to the threaded inserts;
 - latch protrusion and movement envelope;
 - maximum rear curvature/depth at center and corners;
-- left-side port region top/bottom limits;
-- right-side optical-drive and OSD/power region top/bottom limits;
+- left-side port-region limits;
+- right-side optical-drive and OSD/power-region limits;
 - distance from chassis outer edge to active display on all four sides;
 - top exhaust start/end and slot width;
 - bottom speaker/opening location;
-- operating temperature at top exhaust and in wall gap during a 30–60 minute CPU load.
+- operating temperature around the top exhaust and wall gap during sustained load.
 
-If any fit coupon touches the Dell before the intended locating surfaces do, revise the CAD before ordering the full enclosure.
+The clearance-first geometry does not require these values for its nominal published-dimension fit, but the included fit coupons remain the lowest-cost way to catch unusual unit condition, casing deformation, or screw-depth differences before paying for a full enclosure.

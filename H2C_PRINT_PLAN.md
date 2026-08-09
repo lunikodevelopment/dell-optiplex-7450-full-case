@@ -1,16 +1,23 @@
-# H2C manufacturing plan
+# H2C Print Plan — V3.1
 
-Official H2C specifications provide a build volume larger than these parts, but tool/nozzle mode can change the usable X range. V3 therefore uses a deliberately conservative per-part target of **300 x 315 x 315 mm**.
+Design envelope used for every H2C part: **300 × 315 × 315 mm**.
 
-Recommended part set:
+Largest generated H2C part: approximately **295.62 × 210.45 × 74.3 mm**.
 
-1. `rear_top_left`
-2. `rear_top_right`
-3. `rear_bottom_left`
-4. `rear_bottom_right`
-5. four matching front retainer quadrants
-6. universal receiver, wall plate and anti-lift block
+Recommended service approach:
+- Enclosure quadrants: ASA, ABS-GF/CF where appropriate, or another heat/creep-resistant engineering filament offered by the service.
+- Receiver and wall plate: use the strongest creep-resistant material the service supports; prefer the optional metal receiver backer for a permanent wall installation.
+- Single-material/single-nozzle printing is sufficient.
+- Ask the service to confirm actual printable area for the selected H2C nozzle mode and whether a brim is counted outside the model envelope.
 
-Print the shell pieces with their broad rear plane/edge arrangement selected to minimize supports in the service's slicer. The geometry uses large open windows rather than support-heavy duct tunnels.
+Parts:
+- rear_top_left
+- rear_top_right
+- rear_bottom_left
+- rear_bottom_right
+- front_top_left
+- front_top_right
+- front_bottom_left
+- front_bottom_right
 
-For lowest printing time, use a 0.6 or 0.8 mm nozzle if the service supports it and accepts the resulting surface finish. Shell walls are 3.0 mm nominal; do not enable dense infill simply because earlier P1S revisions used it. The structural receiver/wall plate are compact and should receive the conservative structural settings, not the whole enclosure.
+The H2C set is generated under `generated/h2c/` by the repository workflow.

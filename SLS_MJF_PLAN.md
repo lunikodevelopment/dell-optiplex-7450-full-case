@@ -1,13 +1,16 @@
-# SLS / MJF manufacturing plan
+# SLS / MJF Plan — V3.1
 
-Use `sls_mjf/` when the provider accepts a roughly 293 x 404 x 70 mm rear half. This reduces the protective enclosure to four major printed pieces: two rear halves and two front halves.
+Preferred material: **PA12 or comparable functional nylon**.
 
-The shell is modeled as real 3.0 mm walls / 2.8 mm rear bands with open service regions, so there is no FDM-style infill to pay for. Large internal openings also reduce powder/material volume and make cleaning easier.
+Production set:
+- rear_left_half
+- rear_right_half
+- front_left_half
+- front_right_half
+- universal receiver/wall hardware as separate parts
 
-Ask the provider to confirm:
-- machine bounding box for the full-height halves;
-- PA12 dimensional tolerance on ~400 mm long parts;
-- preferred minimum wall/rib thickness;
-- whether they recommend splitting the full-height halves further to reduce warp/cost.
+The shell is thin-wall/open-frame geometry intended to avoid unnecessary solid material. Powder-bed production removes FDM support constraints. The service must confirm that the full-height half-shell parts fit its machine envelope and quotation rules.
 
-If the provider rejects the large halves, use the H2C quadrant STL set with SLS/MJF as a universally smaller fallback.
+For permanent wall mounting, keep the printed shell nonstructural and use the optional metal backer or a commercial metal VESA backbone.
+
+The production set is generated under `generated/sls_mjf/` by the repository workflow.

@@ -1,23 +1,13 @@
-for x in (-VESA/2,VESA/2):
-    for y in (-VESA/2,VESA/2):
-        receiver=receiver.union(cq.Workplane('XY').center(x,y).circle(9).extrude(RT+DELL_STANDOFF))
-        receiver=receiver.cut(cq.Workplane('XY').center(x,y).circle(M4_CLEAR/2).extrude(RT+DELL_STANDOFF+2).translate((0,0,-1)))
-# Four M8 steel-stud keyholes: entry circle below seated shank position.
-for x in (-STUD_X,STUD_X):
-    for y in (-STUD_Y,STUD_Y):
-        ey=y-KEY_TRAVEL
-        big=cq.Workplane('XY').center(x,ey).circle(KEY_BIG/2).extrude(RT+2).translate((0,0,-1))
-        # narrow path from entry center upward to seated center
         slot=cq.Workplane('XY').center(x,(ey+y)/2).rect(KEY_SLOT,KEY_TRAVEL).extrude(RT+2).translate((0,0,-1))
         end=cq.Workplane('XY').center(x,y).circle(KEY_SLOT/2).extrude(RT+2).translate((0,0,-1))
         receiver=receiver.cut(big.union(slot).union(end))
 # Open-bottom lock channel. Wall ear travels up this channel during seating.
-LOCK_SLOT_W=16.0
-LOCK_SLOT_TOP=-38.0
+LOCK_SLOT_W=56.0
+LOCK_SLOT_TOP=-34.0
 lock_slot=cq.Workplane('XY').center(0,(-RX/2+LOCK_SLOT_TOP)/2).rect(LOCK_SLOT_W,LOCK_SLOT_TOP+RX/2).extrude(RT+2).translate((0,0,-1))
 receiver=receiver.cut(lock_slot)
 # M5 anti-lift block retaining screw tunnel in right bottom cheek, axis +Y.
-LOCK_SCREW_X=22.0
+LOCK_SCREW_X=36.0
 LOCK_SCREW_Z=RT/2
 receiver=cut_cylinder_axis(receiver,(LOCK_SCREW_X,-RX/2-0.5,LOCK_SCREW_Z),(0,1,0),5.5,22.0)
 # Captive M5 square-nut pocket accessed from wall-facing face (z=0) before hanging.
@@ -29,6 +19,9 @@ receiver=receiver.cut(nut_box)
 # Fit-check template, 2.5 mm thick, same outline/VESA/central relief but no structural keyholes.
 fit=plate(RX,RX,2.5,4)
 fit=fit.cut(cq.Workplane('XY').rect(52,42).extrude(4).translate((0,2,-0.5)))
+# Open-bottom latch relief, matching receiver, derived conservatively from calibrated rear-bay photos.
+fit_latch=cq.Workplane('XY').center(0,(-RX/2+LOCK_SLOT_TOP)/2).rect(LOCK_SLOT_W,LOCK_SLOT_TOP+RX/2).extrude(4).translate((0,0,-0.5))
+fit=fit.cut(fit_latch)
 for x in (-50,50):
     for y in (-50,50):
         fit=fit.cut(cq.Workplane('XY').center(x,y).circle(2.3).extrude(4).translate((0,0,-0.5)))
@@ -38,8 +31,9 @@ for x in (-STUD_X,STUD_X):
         fit=fit.cut(cq.Workplane('XY').center(x,y).circle(1.0).extrude(4).translate((0,0,-0.5)))
 
 # Anti-lift removable block: tongue fills lower lock channel; flange sits just below receiver.
-lock_block=cq.Workplane('XY').box(15.2,12.0,9.6,centered=(True,False,False)).translate((0,-RX/2,0.2))
-flange=cq.Workplane('XY').box(36,5.0,9.6,centered=(True,False,False)).translate((10,-RX/2-5.0,0.2))
+LOCK_BLOCK_Y=8.5
+lock_block=cq.Workplane('XY').box(15.2,LOCK_BLOCK_Y,9.6,centered=(True,False,False)).translate((0,-RX/2,0.2))
+flange=cq.Workplane('XY').box(72,5.0,9.6,centered=(True,False,False)).translate((8,-RX/2-5.0,0.2))
 lock_block=lock_block.union(flange)
 # M5 clearance hole in flange aligned to receiver cheek, axis Y.
 lock_block=cut_cylinder_axis(lock_block,(LOCK_SCREW_X,-RX/2-5.5,LOCK_SCREW_Z),(0,1,0),5.6,18)
@@ -98,3 +92,19 @@ for x in (-STUD_X,STUD_X):
 # M8 keyhole hardware coupon + M3 insert coupon
 coupon=plate(50,58,RT,3)
 # keyhole on coupon center
+big=cq.Workplane('XY').center(0,-7).circle(KEY_BIG/2).extrude(RT+2).translate((0,0,-1))
+slot=cq.Workplane('XY').center(0,0).rect(KEY_SLOT,14).extrude(RT+2).translate((0,0,-1))
+end=cq.Workplane('XY').center(0,7).circle(KEY_SLOT/2).extrude(RT+2).translate((0,0,-1))
+coupon=coupon.cut(big.union(slot).union(end))
+# M3 heat insert fit holes at 4.2 / 4.4 / 4.6 / 4.8 mm
+for i,d in enumerate((4.2,4.4,4.6,4.8)):
+    x=-18+i*12
+    coupon=coupon.cut(cq.Workplane('XY').center(x,20).circle(d/2).extrude(7).translate((0,0,RT-7)))
+
+# ---------------- Full protective enclosure geometry ----------------
+# Side/top/bottom walls
+shell=cq.Workplane('XY').box(SHELL_T,OUT_H,SHELL_D,centered=(True,True,False)).translate((-OUT_W/2+SHELL_T/2,0,0))
+shell=shell.union(cq.Workplane('XY').box(SHELL_T,OUT_H,SHELL_D,centered=(True,True,False)).translate((OUT_W/2-SHELL_T/2,0,0)))
+shell=shell.union(cq.Workplane('XY').box(OUT_W,SHELL_T,SHELL_D,centered=(True,True,False)).translate((0,OUT_H/2-SHELL_T/2,0)))
+shell=shell.union(cq.Workplane('XY').box(OUT_W,SHELL_T,SHELL_D,centered=(True,True,False)).translate((0,-OUT_H/2+SHELL_T/2,0)))
+# Rear perimeter band

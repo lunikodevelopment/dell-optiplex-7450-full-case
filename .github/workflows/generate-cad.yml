@@ -1,11 +1,11 @@
-name: Generate V3 CAD outputs
+name: Generate V3.1 CAD outputs
 
 on:
   push:
     branches: [main]
     paths:
-      - 'source_parts/**'
-      - 'build_v3.py'
+      - 'source_parts_v3_1/**'
+      - 'build_v3_1.py'
       - 'requirements.txt'
       - '.github/workflows/generate-cad.yml'
   workflow_dispatch:
@@ -31,17 +31,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Generate STL, STEP and DXF outputs
-        run: python build_v3.py
+      - name: Generate V3.1 STL, STEP and DXF outputs
+        run: python build_v3_1.py
 
       - name: Commit generated CAD
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CAD_SOURCE_make_v3.py generated/
+          git add -A generated/ CAD_SOURCE_make_v3_1.py
           if git diff --cached --quiet; then
             echo "Generated files already up to date."
           else
-            git commit -m "Generate V3 CAD outputs"
+            git commit -m "Generate V3.1 clearance-first CAD outputs"
             git push
           fi

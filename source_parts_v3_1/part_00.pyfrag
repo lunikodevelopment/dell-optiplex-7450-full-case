@@ -3,7 +3,7 @@ from cadquery import exporters
 from pathlib import Path
 import json, math, shutil, zipfile, os
 
-OUT=Path('/mnt/data/dell_7450_full_case_v3')
+OUT=Path('/mnt/data/dell_7450_full_case_v3_1_clearance')
 if OUT.exists(): shutil.rmtree(OUT)
 (OUT/'universal').mkdir(parents=True)
 (OUT/'h2c').mkdir()
@@ -17,8 +17,8 @@ AIO_H=392.90
 AIO_D=63.50   # max published depth (non-touch)
 VESA=100.0
 # Enclosure clearances, conservative until unit is physically measured
-XY_CLEAR=2.50
-DEPTH_CLEAR=4.0
+XY_CLEAR=5.00
+DEPTH_CLEAR=8.0
 SHELL_T=3.0
 REAR_SKIN=2.8
 OUT_W=AIO_W+2*XY_CLEAR+2*SHELL_T       # 586.24
@@ -28,18 +28,18 @@ INNER_H=AIO_H+2*XY_CLEAR
 SHELL_D=AIO_D+DEPTH_CLEAR+REAR_SKIN    # 70.3
 REAR_Z=SHELL_D-REAR_SKIN
 REAR_BAND=20.0
-CENTER_OPEN=184.0
+CENTER_OPEN=190.0
 FRONT_T=4.5
-FRONT_OVERLAP=4.0
+FRONT_OVERLAP=2.0
 
 # Structural receiver: keep the Dell-side outline under 140 x 140 mm
-RX=138.0
+RX=128.0
 RT=10.0
 DELL_STANDOFF=6.0
 M4_CLEAR=4.6
 M4_WASHER_OD=20.0
 # Four steel-stud positions; deliberately distinct from VESA corners
-STUD_X=38.0
+STUD_X=42.0
 STUD_Y=28.0
 KEY_BIG=22.0      # M8 washer/head entry clearance
 KEY_SLOT=8.8      # M8 shank clearance
@@ -98,3 +98,13 @@ for x in (-VESA/2,VESA/2):
     for y in (-VESA/2,VESA/2):
         receiver=receiver.cut(cq.Workplane('XY').center(x,y).circle(M4_CLEAR/2).extrude(RT+2).translate((0,0,-1)))
 # 6 mm Dell-side stand-offs around each M4 point, OD 18; recut holes.
+for x in (-VESA/2,VESA/2):
+    for y in (-VESA/2,VESA/2):
+        receiver=receiver.union(cq.Workplane('XY').center(x,y).circle(9).extrude(RT+DELL_STANDOFF))
+        receiver=receiver.cut(cq.Workplane('XY').center(x,y).circle(M4_CLEAR/2).extrude(RT+DELL_STANDOFF+2).translate((0,0,-1)))
+# Four M8 steel-stud keyholes: entry circle below seated shank position.
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        ey=y-KEY_TRAVEL
+        big=cq.Workplane('XY').center(x,ey).circle(KEY_BIG/2).extrude(RT+2).translate((0,0,-1))
+        # narrow path from entry center upward to seated center

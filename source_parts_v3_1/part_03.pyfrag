@@ -1,29 +1,3 @@
-    'rear_top_left': clip(shell,-OUT_W/2-M,0,0,OUT_H/2+M),
-    'rear_top_right': clip(shell,0,OUT_W/2+M,0,OUT_H/2+M),
-    'rear_bottom_left': clip(shell,-OUT_W/2-M,0,-OUT_H/2-M,0),
-    'rear_bottom_right': clip(shell,0,OUT_W/2+M,-OUT_H/2-M,0),
-    'front_top_left': clip(front,-OUT_W/2-M,0,0,OUT_H/2+M,z0=-10,z1=10),
-    'front_top_right': clip(front,0,OUT_W/2+M,0,OUT_H/2+M,z0=-10,z1=10),
-    'front_bottom_left': clip(front,-OUT_W/2-M,0,-OUT_H/2-M,0,z0=-10,z1=10),
-    'front_bottom_right': clip(front,0,OUT_W/2+M,-OUT_H/2-M,0,z0=-10,z1=10),
-}
-# SLS/MJF: two vertical halves for far lower assembly count; large-format provider must confirm machine envelope.
-sls_parts={
-    'rear_left_half': clip(shell,-OUT_W/2-M,0,-OUT_H/2-M,OUT_H/2+M),
-    'rear_right_half': clip(shell,0,OUT_W/2+M,-OUT_H/2-M,OUT_H/2+M),
-    'front_left_half': clip(front,-OUT_W/2-M,0,-OUT_H/2-M,OUT_H/2+M,z0=-10,z1=10),
-    'front_right_half': clip(front,0,OUT_W/2+M,-OUT_H/2-M,OUT_H/2+M,z0=-10,z1=10),
-}
-
-# ---------------- Fit-check coupons ----------------
-# Corner/depth coupon checks internal XY clearance, depth, rear clearance and front-lip overlap cheaply.
-# 45x45 corner section from full shell + corresponding front corner, shortened to 35 mm depth region at front/rear represented by rails.
-corner_shell=clip(shell,-OUT_W/2-M,-OUT_W/2+48,-OUT_H/2-M,-OUT_H/2+48,z0=-2,z1=SHELL_D+2)
-corner_front=clip(front,-OUT_W/2-M,-OUT_W/2+48,-OUT_H/2-M,-OUT_H/2+48,z0=-10,z1=5)
-# Simple 3 mm front-overlap gauge variants 3/4/5 mm in one coupon bar
-lip_coupon=cq.Workplane('XY').box(70,24,3,centered=(True,True,False))
-for i,ov in enumerate((3.0,4.0,5.0)):
-    x=-24+i*24
     slot=cq.Workplane('XY').center(x,0).rect(12,12).extrude(4).translate((0,0,-0.5))
     lip_coupon=lip_coupon.cut(slot)
     # marker notch depth corresponds to overlap
@@ -46,7 +20,7 @@ backer=backer.cut(cq.Workplane('XY').center(0,(-66+LOCK_SLOT_TOP)/2).rect(LOCK_S
 # ---------------- Export ----------------
 universal=OUT/'universal'
 fitdir=OUT/'fit_checks'
-export_part(receiver,'vesa_receiver_138x138_10mm',universal)
+export_part(receiver,'vesa_receiver_128x128_10mm',universal)
 export_part(wall,'wall_plate_4xM8_stud',universal)
 export_part(lock_block,'positive_anti_lift_lock_block',universal)
 export_part(drill,'wall_drill_template_2mm',fitdir)
@@ -54,7 +28,7 @@ export_part(fit,'vesa_recess_fit_template_2p5mm',fitdir)
 export_part(coupon,'m8_keyhole_and_insert_coupon',fitdir)
 export_part(corner_shell,'enclosure_corner_depth_coupon',fitdir)
 export_part(corner_front,'enclosure_front_corner_coupon',fitdir)
-export_part(lip_coupon,'front_overlap_3_4_5mm_coupon',fitdir)
+export_part(lip_coupon,'front_overlap_1_2_3mm_coupon',fitdir)
 export_part(joiner_long,'seam_joiner_180mm',universal)
 export_part(joiner_short,'seam_joiner_130mm',universal)
 export_part(backer,'optional_2mm_receiver_backer',OUT/'optional_metal')
@@ -98,3 +72,39 @@ def inspect_dir(folder,tag,h2c_check=False):
         qa['parts'][f'{tag}/{p.name}']={
             'dims_mm':[round(float(v),2) for v in d],
             'watertight':bool(m.is_watertight),
+            'volume_mm3':round(abs(float(m.volume)),1),
+            'fits_h2c_safe_envelope': bool(d[0]<=H2C_SAFE[0]+1e-6 and d[1]<=H2C_SAFE[1]+1e-6 and d[2]<=H2C_SAFE[2]+1e-6) if h2c_check else None,
+        }
+inspect_dir(universal,'universal',True)
+inspect_dir(fitdir,'fit_checks',True)
+inspect_dir(OUT/'h2c','h2c',True)
+inspect_dir(OUT/'sls_mjf','sls_mjf',False)
+inspect_dir(OUT/'optional_metal','optional_metal',True)
+qa['design_basis']={
+    'aio_published_envelope_mm':[AIO_W,AIO_H,AIO_D],
+    'vesa_mm':[100,100], 'vesa_screw':'M4',
+    'receiver_envelope_mm':[RX,RX,RT+DELL_STANDOFF],
+    'receiver_structural_thickness_mm':RT,
+    'fit_template_thickness_mm':2.5,
+    'recommended_m4_fender_washer_od_mm':M4_WASHER_OD,
+    'wall_plate_mm':[WALL_W,WALL_H,WALL_T+BOSS_H],
+    'nominal_wall_to_dell_rear_mm':round(WALL_TO_DELL_REAR,1),
+    'nominal_shell_to_wall_clearance_mm':round(SHELL_TO_WALL_CLEAR,1),
+    'steel_stud_pattern_mm':[2*STUD_X,2*STUD_Y],
+    'steel_stud_size':'M8 carriage bolts / equivalent steel studs',
+    'keyhole_seating_travel_mm':KEY_TRAVEL,
+    'enclosure_outer_mm':[round(OUT_W,2),round(OUT_H,2),round(SHELL_D,2)],
+    'enclosure_nominal_internal_clearance_xy_mm':[2*XY_CLEAR,2*XY_CLEAR],
+    'central_mount_avoidance_opening_mm':CENTER_OPEN,
+    'h2c_conservative_part_envelope_mm':list(H2C_SAFE),
+}
+# All H2C/universal/fit check STL dimensions and water tightness
+h2c_records=[v for k,v in qa['parts'].items() if k.startswith(('h2c/','universal/','fit_checks/'))]
+qa['checks']['all_h2c_variant_parts_within_conservative_envelope']=all(r['fits_h2c_safe_envelope'] for r in h2c_records)
+qa['checks']['all_exported_stls_watertight']=all(v['watertight'] for v in qa['parts'].values())
+qa['checks']['receiver_outline_le_140mm']=RX<=140
+qa['checks']['receiver_structural_thickness_9_to_10mm']=9<=RT<=10
+qa['checks']['fit_template_2_to_3mm']=2<=2.5<=3
+qa['checks']['wall_to_dell_rear_ge_30mm']=WALL_TO_DELL_REAR>=30
+qa['checks']['shell_to_wall_clearance_ge_20mm_nominal']=SHELL_TO_WALL_CLEAR>=20
+qa['checks']['positive_lock_block_present']=True

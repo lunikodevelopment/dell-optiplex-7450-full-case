@@ -1,24 +1,8 @@
-big=cq.Workplane('XY').center(0,-7).circle(KEY_BIG/2).extrude(RT+2).translate((0,0,-1))
-slot=cq.Workplane('XY').center(0,0).rect(KEY_SLOT,14).extrude(RT+2).translate((0,0,-1))
-end=cq.Workplane('XY').center(0,7).circle(KEY_SLOT/2).extrude(RT+2).translate((0,0,-1))
-coupon=coupon.cut(big.union(slot).union(end))
-# M3 heat insert fit holes at 4.2 / 4.4 / 4.6 / 4.8 mm
-for i,d in enumerate((4.2,4.4,4.6,4.8)):
-    x=-18+i*12
-    coupon=coupon.cut(cq.Workplane('XY').center(x,20).circle(d/2).extrude(7).translate((0,0,RT-7)))
-
-# ---------------- Full protective enclosure geometry ----------------
-# Side/top/bottom walls
-shell=cq.Workplane('XY').box(SHELL_T,OUT_H,SHELL_D,centered=(True,True,False)).translate((-OUT_W/2+SHELL_T/2,0,0))
-shell=shell.union(cq.Workplane('XY').box(SHELL_T,OUT_H,SHELL_D,centered=(True,True,False)).translate((OUT_W/2-SHELL_T/2,0,0)))
-shell=shell.union(cq.Workplane('XY').box(OUT_W,SHELL_T,SHELL_D,centered=(True,True,False)).translate((0,OUT_H/2-SHELL_T/2,0)))
-shell=shell.union(cq.Workplane('XY').box(OUT_W,SHELL_T,SHELL_D,centered=(True,True,False)).translate((0,-OUT_H/2+SHELL_T/2,0)))
-# Rear perimeter band
 outer_back=cq.Workplane('XY').rect(OUT_W,OUT_H).extrude(REAR_SKIN).translate((0,0,REAR_Z))
 inner_back=cq.Workplane('XY').rect(OUT_W-2*REAR_BAND,OUT_H-2*REAR_BAND).extrude(REAR_SKIN+2).translate((0,0,REAR_Z-1))
 back_band=outer_back.cut(inner_back)
 shell=shell.union(back_band)
-# Rear seam rails, leaving central 184x184 opening clear
+# Rear seam rails, leaving central 190x190 opening clear
 railw=10.0
 half_open=CENTER_OPEN/2
 # vertical top/bottom
@@ -55,7 +39,7 @@ for sy in (-1,1):
         tab=tab.cut(cq.Workplane('XY').center(x,y).circle(2.3).extrude(7.2))
         shell=shell.union(tab); tab_pts.append((x,y))
 
-# Front retainer frame, 4.5 mm thick. Screen opening gives exactly 4 mm overlap onto published chassis envelope.
+# Front retainer frame, 4.5 mm thick. Screen opening gives exactly 2 mm overlap onto published chassis envelope.
 front_outer=cq.Workplane('XY').rect(OUT_W,OUT_H).extrude(FRONT_T).translate((0,0,-FRONT_T))
 front_inner=cq.Workplane('XY').rect(AIO_W-2*FRONT_OVERLAP,AIO_H-2*FRONT_OVERLAP).extrude(FRONT_T+2).translate((0,0,-FRONT_T-1))
 front=front_outer.cut(front_inner)
@@ -98,3 +82,29 @@ def clip(shape,x0,x1,y0,y1,z0=-20,z1=100):
 
 M=10
 h2c_parts={
+    'rear_top_left': clip(shell,-OUT_W/2-M,0,0,OUT_H/2+M),
+    'rear_top_right': clip(shell,0,OUT_W/2+M,0,OUT_H/2+M),
+    'rear_bottom_left': clip(shell,-OUT_W/2-M,0,-OUT_H/2-M,0),
+    'rear_bottom_right': clip(shell,0,OUT_W/2+M,-OUT_H/2-M,0),
+    'front_top_left': clip(front,-OUT_W/2-M,0,0,OUT_H/2+M,z0=-10,z1=10),
+    'front_top_right': clip(front,0,OUT_W/2+M,0,OUT_H/2+M,z0=-10,z1=10),
+    'front_bottom_left': clip(front,-OUT_W/2-M,0,-OUT_H/2-M,0,z0=-10,z1=10),
+    'front_bottom_right': clip(front,0,OUT_W/2+M,-OUT_H/2-M,0,z0=-10,z1=10),
+}
+# SLS/MJF: two vertical halves for far lower assembly count; large-format provider must confirm machine envelope.
+sls_parts={
+    'rear_left_half': clip(shell,-OUT_W/2-M,0,-OUT_H/2-M,OUT_H/2+M),
+    'rear_right_half': clip(shell,0,OUT_W/2+M,-OUT_H/2-M,OUT_H/2+M),
+    'front_left_half': clip(front,-OUT_W/2-M,0,-OUT_H/2-M,OUT_H/2+M,z0=-10,z1=10),
+    'front_right_half': clip(front,0,OUT_W/2+M,-OUT_H/2-M,OUT_H/2+M,z0=-10,z1=10),
+}
+
+# ---------------- Fit-check coupons ----------------
+# Corner/depth coupon checks internal XY clearance, depth, rear clearance and front-lip overlap cheaply.
+# 45x45 corner section from full shell + corresponding front corner, shortened to 35 mm depth region at front/rear represented by rails.
+corner_shell=clip(shell,-OUT_W/2-M,-OUT_W/2+48,-OUT_H/2-M,-OUT_H/2+48,z0=-2,z1=SHELL_D+2)
+corner_front=clip(front,-OUT_W/2-M,-OUT_W/2+48,-OUT_H/2-M,-OUT_H/2+48,z0=-10,z1=5)
+# Simple 3 mm front-overlap gauge variants 3/4/5 mm in one coupon bar
+lip_coupon=cq.Workplane('XY').box(70,24,3,centered=(True,True,False))
+for i,ov in enumerate((1.0,2.0,3.0)):
+    x=-24+i*24
