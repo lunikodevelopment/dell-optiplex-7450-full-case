@@ -1,0 +1,100 @@
+for x in (-VESA/2,VESA/2):
+    for y in (-VESA/2,VESA/2):
+        receiver=receiver.union(cq.Workplane('XY').center(x,y).circle(9).extrude(RT+DELL_STANDOFF))
+        receiver=receiver.cut(cq.Workplane('XY').center(x,y).circle(M4_CLEAR/2).extrude(RT+DELL_STANDOFF+2).translate((0,0,-1)))
+# Four M8 steel-stud keyholes: entry circle below seated shank position.
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        ey=y-KEY_TRAVEL
+        big=cq.Workplane('XY').center(x,ey).circle(KEY_BIG/2).extrude(RT+2).translate((0,0,-1))
+        # narrow path from entry center upward to seated center
+        slot=cq.Workplane('XY').center(x,(ey+y)/2).rect(KEY_SLOT,KEY_TRAVEL).extrude(RT+2).translate((0,0,-1))
+        end=cq.Workplane('XY').center(x,y).circle(KEY_SLOT/2).extrude(RT+2).translate((0,0,-1))
+        receiver=receiver.cut(big.union(slot).union(end))
+# Open-bottom lock channel. Wall ear travels up this channel during seating.
+LOCK_SLOT_W=16.0
+LOCK_SLOT_TOP=-38.0
+lock_slot=cq.Workplane('XY').center(0,(-RX/2+LOCK_SLOT_TOP)/2).rect(LOCK_SLOT_W,LOCK_SLOT_TOP+RX/2).extrude(RT+2).translate((0,0,-1))
+receiver=receiver.cut(lock_slot)
+# M5 anti-lift block retaining screw tunnel in right bottom cheek, axis +Y.
+LOCK_SCREW_X=22.0
+LOCK_SCREW_Z=RT/2
+receiver=cut_cylinder_axis(receiver,(LOCK_SCREW_X,-RX/2-0.5,LOCK_SCREW_Z),(0,1,0),5.5,22.0)
+# Captive M5 square-nut pocket accessed from wall-facing face (z=0) before hanging.
+# Pocket centered 12 mm up from bottom edge.
+nut_box=cq.Workplane('XY').center(LOCK_SCREW_X,-RX/2+13).rect(8.4,4.4).extrude(8.5)
+# make pocket extend in Z from wall face, leaving Dell-side skin
+receiver=receiver.cut(nut_box)
+
+# Fit-check template, 2.5 mm thick, same outline/VESA/central relief but no structural keyholes.
+fit=plate(RX,RX,2.5,4)
+fit=fit.cut(cq.Workplane('XY').rect(52,42).extrude(4).translate((0,2,-0.5)))
+for x in (-50,50):
+    for y in (-50,50):
+        fit=fit.cut(cq.Workplane('XY').center(x,y).circle(2.3).extrude(4).translate((0,0,-0.5)))
+# Add four small 2mm marker holes at steel-stud locations so template can also verify no casing interference there.
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        fit=fit.cut(cq.Workplane('XY').center(x,y).circle(1.0).extrude(4).translate((0,0,-0.5)))
+
+# Anti-lift removable block: tongue fills lower lock channel; flange sits just below receiver.
+lock_block=cq.Workplane('XY').box(15.2,12.0,9.6,centered=(True,False,False)).translate((0,-RX/2,0.2))
+flange=cq.Workplane('XY').box(36,5.0,9.6,centered=(True,False,False)).translate((10,-RX/2-5.0,0.2))
+lock_block=lock_block.union(flange)
+# M5 clearance hole in flange aligned to receiver cheek, axis Y.
+lock_block=cut_cylinder_axis(lock_block,(LOCK_SCREW_X,-RX/2-5.5,LOCK_SCREW_Z),(0,1,0),5.6,18)
+
+# ---------------- Wall plate ----------------
+wall=plate(WALL_W,WALL_H,WALL_T,7)
+# Explicit wall attachment patterns:
+# timber stud: vertical three-hole centerline, 60 mm spacing
+wall_pts=[(0,-60),(0,0),(0,60),(-95,-60),(-95,60),(95,-60),(95,60)]
+for x,y in wall_pts:
+    wall=wall.cut(cq.Workplane('XY').center(x,y).circle(3.6).extrude(WALL_T+2).translate((0,0,-1)))
+    wall=wall.cut(cq.Workplane('XY').center(x,y).circle(8.0).extrude(3.0).translate((0,0,WALL_T-3.0)))
+# Four standoff bosses and M8 carriage-bolt captures.
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        boss=cq.Workplane('XY').center(x,y).circle(BOSS_OD/2).extrude(WALL_T+BOSS_H)
+        wall=wall.union(boss)
+        # square M8 carriage neck through boss+plate
+        sq=cq.Workplane('XY').center(x,y).rect(CARRIAGE_SQ,CARRIAGE_SQ).extrude(WALL_T+BOSS_H+2).translate((0,0,-1))
+        wall=wall.cut(sq)
+        # rear head recess
+        head=cq.Workplane('XY').center(x,y).circle(CARRIAGE_HEAD_D/2).extrude(CARRIAGE_RECESS)
+        wall=wall.cut(head)
+# Broad low ribs from bosses to central zone, below receiver back plane.
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        ribx=cq.Workplane('XY').center(x/2,y).rect(abs(x),12).extrude(WALL_T+10)
+        riby=cq.Workplane('XY').center(x,y/2).rect(12,abs(y)).extrude(WALL_T+10)
+        wall=wall.union(ribx).union(riby)
+# re-cut carriage passages after ribs
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        wall=wall.cut(cq.Workplane('XY').center(x,y).rect(CARRIAGE_SQ,CARRIAGE_SQ).extrude(WALL_T+BOSS_H+2).translate((0,0,-1)))
+        wall=wall.cut(cq.Workplane('XY').center(x,y).circle(CARRIAGE_HEAD_D/2).extrude(CARRIAGE_RECESS))
+# Positive-lock wall ear, between bosses, projects into receiver's open-bottom channel.
+# Ear lower edge is 1.5 mm above installed lock block top when seated.
+EAR_W=12.0
+EAR_H=11.0
+EAR_Y0=-54.5
+EAR_Z0=WALL_T+BOSS_H+0.2
+EAR_DEPTH=9.2
+ear=cq.Workplane('XY').center(0,EAR_Y0+EAR_H/2).rect(EAR_W,EAR_H).extrude(EAR_Z0+EAR_DEPTH)
+# remove ear material below boss-front datum so it's only a forward tongue
+cutback=cq.Workplane('XY').center(0,EAR_Y0+EAR_H/2).rect(EAR_W+1,EAR_H+1).extrude(EAR_Z0)
+ear=ear.cut(cutback)
+wall=wall.union(ear)
+
+# 2 mm wall drill template; only wall fastener holes + center and stud markers.
+drill=plate(WALL_W,WALL_H,2.0,4)
+for x,y in wall_pts:
+    drill=drill.cut(cq.Workplane('XY').center(x,y).circle(3.0).extrude(4).translate((0,0,-1)))
+for x in (-STUD_X,STUD_X):
+    for y in (-STUD_Y,STUD_Y):
+        drill=drill.cut(cq.Workplane('XY').center(x,y).circle(1.0).extrude(4).translate((0,0,-1)))
+
+# M8 keyhole hardware coupon + M3 insert coupon
+coupon=plate(50,58,RT,3)
+# keyhole on coupon center
