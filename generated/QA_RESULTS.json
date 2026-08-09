@@ -11,8 +11,8 @@
     ],
     "vesa_screw": "M4",
     "receiver_envelope_mm": [
-      138.0,
-      138.0,
+      128.0,
+      128.0,
       16.0
     ],
     "receiver_structural_thickness_mm": 10.0,
@@ -24,23 +24,23 @@
       36.0
     ],
     "nominal_wall_to_dell_rear_mm": 52.3,
-    "nominal_shell_to_wall_clearance_mm": 45.5,
+    "nominal_shell_to_wall_clearance_mm": 41.5,
     "steel_stud_pattern_mm": [
-      76.0,
+      84.0,
       56.0
     ],
     "steel_stud_size": "M8 carriage bolts / equivalent steel studs",
     "keyhole_seating_travel_mm": 14.0,
     "enclosure_outer_mm": [
-      586.24,
-      403.9,
-      70.3
+      591.24,
+      408.9,
+      74.3
     ],
     "enclosure_nominal_internal_clearance_xy_mm": [
-      5.0,
-      5.0
+      10.0,
+      10.0
     ],
-    "central_mount_avoidance_opening_mm": 184.0,
+    "central_mount_avoidance_opening_mm": 190.0,
     "h2c_conservative_part_envelope_mm": [
       300.0,
       315.0,
@@ -50,12 +50,12 @@
   "parts": {
     "universal/positive_anti_lift_lock_block.stl": {
       "dims_mm": [
-        36.0,
-        17.0,
+        72.0,
+        13.5,
         9.6
       ],
       "watertight": true,
-      "volume_mm3": 3356.0,
+      "volume_mm3": 4573.2,
       "fits_h2c_safe_envelope": true
     },
     "universal/seam_joiner_130mm.stl": {
@@ -78,14 +78,14 @@
       "volume_mm3": 17670.3,
       "fits_h2c_safe_envelope": true
     },
-    "universal/vesa_receiver_138x138_10mm.stl": {
+    "universal/vesa_receiver_128x128_10mm.stl": {
       "dims_mm": [
-        138.0,
-        138.0,
+        128.0,
+        128.0,
         16.0
       ],
       "watertight": true,
-      "volume_mm3": 150374.5,
+      "volume_mm3": 112284.7,
       "fits_h2c_safe_envelope": true
     },
     "universal/wall_plate_4xM8_stud.stl": {
@@ -95,17 +95,17 @@
         45.4
       ],
       "watertight": true,
-      "volume_mm3": 332949.8,
+      "volume_mm3": 334869.8,
       "fits_h2c_safe_envelope": true
     },
     "fit_checks/enclosure_corner_depth_coupon.stl": {
       "dims_mm": [
         48.0,
         54.0,
-        70.3
+        74.3
       ],
       "watertight": true,
-      "volume_mm3": 23441.3,
+      "volume_mm3": 24407.3,
       "fits_h2c_safe_envelope": true
     },
     "fit_checks/enclosure_front_corner_coupon.stl": {
@@ -115,17 +115,17 @@
         4.5
       ],
       "watertight": true,
-      "volume_mm3": 3856.6,
+      "volume_mm3": 3961.3,
       "fits_h2c_safe_envelope": true
     },
-    "fit_checks/front_overlap_3_4_5mm_coupon.stl": {
+    "fit_checks/front_overlap_1_2_3mm_coupon.stl": {
       "dims_mm": [
         70.0,
         24.0,
         3.0
       ],
       "watertight": true,
-      "volume_mm3": 3528.0,
+      "volume_mm3": 3636.0,
       "fits_h2c_safe_envelope": true
     },
     "fit_checks/m8_keyhole_and_insert_coupon.stl": {
@@ -140,12 +140,12 @@
     },
     "fit_checks/vesa_recess_fit_template_2p5mm.stl": {
       "dims_mm": [
-        138.0,
-        138.0,
+        128.0,
+        128.0,
         2.5
       ],
       "watertight": true,
-      "volume_mm3": 41918.1,
+      "volume_mm3": 31068.1,
       "fits_h2c_safe_envelope": true
     },
     "fit_checks/wall_drill_template_2mm.stl": {
@@ -160,122 +160,122 @@
     },
     "h2c/front_bottom_left.stl": {
       "dims_mm": [
-        194.12,
-        207.95,
+        196.62,
+        210.45,
         4.5
       ],
       "watertight": true,
-      "volume_mm3": 13309.6,
+      "volume_mm3": 14154.6,
       "fits_h2c_safe_envelope": true
     },
     "h2c/front_bottom_right.stl": {
       "dims_mm": [
-        194.12,
-        207.95,
+        196.62,
+        210.45,
         4.5
       ],
       "watertight": true,
-      "volume_mm3": 13309.6,
+      "volume_mm3": 14154.6,
       "fits_h2c_safe_envelope": true
     },
     "h2c/front_top_left.stl": {
       "dims_mm": [
-        203.12,
-        207.95,
+        205.62,
+        210.45,
         4.5
       ],
       "watertight": true,
-      "volume_mm3": 18012.1,
+      "volume_mm3": 19104.6,
       "fits_h2c_safe_envelope": true
     },
     "h2c/front_top_right.stl": {
       "dims_mm": [
-        203.12,
-        207.95,
+        205.62,
+        210.45,
         4.5
       ],
       "watertight": true,
-      "volume_mm3": 18012.1,
+      "volume_mm3": 19104.6,
       "fits_h2c_safe_envelope": true
     },
     "h2c/rear_bottom_left.stl": {
       "dims_mm": [
-        293.12,
-        207.95,
-        70.3
+        295.62,
+        210.45,
+        74.3
       ],
       "watertight": true,
-      "volume_mm3": 74340.1,
+      "volume_mm3": 77143.5,
       "fits_h2c_safe_envelope": true
     },
     "h2c/rear_bottom_right.stl": {
       "dims_mm": [
-        293.12,
-        207.95,
-        70.3
+        295.62,
+        210.45,
+        74.3
       ],
       "watertight": true,
-      "volume_mm3": 74340.1,
+      "volume_mm3": 77143.5,
       "fits_h2c_safe_envelope": true
     },
     "h2c/rear_top_left.stl": {
       "dims_mm": [
-        293.12,
-        207.95,
-        70.3
+        295.62,
+        210.45,
+        74.3
       ],
       "watertight": true,
-      "volume_mm3": 65880.1,
+      "volume_mm3": 68203.5,
       "fits_h2c_safe_envelope": true
     },
     "h2c/rear_top_right.stl": {
       "dims_mm": [
-        293.12,
-        207.95,
-        70.3
+        295.62,
+        210.45,
+        74.3
       ],
       "watertight": true,
-      "volume_mm3": 65880.1,
+      "volume_mm3": 68203.5,
       "fits_h2c_safe_envelope": true
     },
     "sls_mjf/front_left_half.stl": {
       "dims_mm": [
-        203.12,
-        415.9,
+        205.62,
+        420.9,
         4.5
       ],
       "watertight": true,
-      "volume_mm3": 31321.7,
+      "volume_mm3": 33259.2,
       "fits_h2c_safe_envelope": null
     },
     "sls_mjf/front_right_half.stl": {
       "dims_mm": [
-        203.12,
-        415.9,
+        205.62,
+        420.9,
         4.5
       ],
       "watertight": true,
-      "volume_mm3": 31321.7,
+      "volume_mm3": 33259.2,
       "fits_h2c_safe_envelope": null
     },
     "sls_mjf/rear_left_half.stl": {
       "dims_mm": [
-        293.12,
-        415.9,
-        70.3
+        295.62,
+        420.9,
+        74.3
       ],
       "watertight": true,
-      "volume_mm3": 140220.2,
+      "volume_mm3": 145346.9,
       "fits_h2c_safe_envelope": null
     },
     "sls_mjf/rear_right_half.stl": {
       "dims_mm": [
-        293.12,
-        415.9,
-        70.3
+        295.62,
+        420.9,
+        74.3
       ],
       "watertight": true,
-      "volume_mm3": 140220.2,
+      "volume_mm3": 145346.9,
       "fits_h2c_safe_envelope": null
     },
     "optional_metal/optional_2mm_receiver_backer.stl": {
@@ -285,7 +285,7 @@
         2.0
       ],
       "watertight": true,
-      "volume_mm3": 30288.6,
+      "volume_mm3": 27626.6,
       "fits_h2c_safe_envelope": true
     }
   },
@@ -312,18 +312,20 @@
     "wall_receiver_intersection_seated_mm3": 0.0,
     "wall_receiver_intersection_entry_mm3": 0.0,
     "wall_receiver_collision_free_in_seated_and_entry": true,
-    "lock_entry_bottom_clearance_mm": 0.5,
-    "lock_block_to_ear_seated_gap_mm": 2.5,
+    "entry_ear_lower_relative_to_open_bottom_mm": -4.5,
+    "entry_ear_top_inside_open_channel_mm": 6.5,
+    "lock_block_to_ear_seated_gap_mm": 1.0,
+    "lock_block_noninterference_seated": true,
     "lock_stops_lift_before_keyhole_release": true,
     "h2c_max_part_dims_mm": [
-      293.12,
-      207.95,
-      70.3
+      295.62,
+      210.45,
+      74.3
     ],
     "h2c_min_margin_to_300x315x315_mm": [
-      6.88,
-      107.05,
-      244.7
+      4.38,
+      104.55,
+      240.7
     ]
   },
   "notes": [
