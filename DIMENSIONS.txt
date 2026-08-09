@@ -1,0 +1,9 @@
+Dell published: 575.24 x 392.90 x 63.50 mm
+Enclosure outer: 586.24 x 403.90 x 70.30 mm
+Receiver: 138.0 x 138.0 x 10.0 mm structural + 6.0 mm Dell standoffs
+VESA: 100 x 100 mm M4
+Steel studs: 76 x 56 mm pattern, M8
+Wall plate: 220 x 160 x 36 mm max body/boss depth
+Nominal Dell-rear-to-wall: 52.3 mm
+Nominal enclosure-back-to-wall: 45.5 mm
+H2C conservative part envelope: 300 x 315 x 315 mm
