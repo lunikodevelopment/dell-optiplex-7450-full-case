@@ -1,9 +1,20 @@
-Dell published: 575.24 x 392.90 x 63.50 mm
-Enclosure outer: 586.24 x 403.90 x 70.30 mm
-Receiver: 138.0 x 138.0 x 10.0 mm structural + 6.0 mm Dell standoffs
-VESA: 100 x 100 mm M4
-Steel studs: 76 x 56 mm pattern, M8
-Wall plate: 220 x 160 x 36 mm max body/boss depth
-Nominal Dell-rear-to-wall: 52.3 mm
-Nominal enclosure-back-to-wall: 45.5 mm
+Dell OptiPlex 7450 AIO V3.1 design basis
+
+Published Dell chassis envelope used: 575.24 x 392.90 x 63.50 mm max depth
+Published VESA pattern: 100 x 100 mm, M4
+Published minimum wall clearance: 20 mm
+
+V3.1 receiver: 128 x 128 mm, 10 mm structural thickness + 6 mm Dell-side standoffs
+M8 stud pattern: 84 x 56 mm
+Keyhole seating travel: 14 mm
+Central shell exclusion: 190 x 190 mm
+Nominal internal X/Y clearance: 10 mm total (5 mm each side)
+Extra depth clearance: 8 mm
+Front overlap: 2 mm
+Enclosure outer reference envelope: 591.24 x 408.90 x 74.30 mm
+Nominal Dell rear to wall: 52.3 mm
+Nominal shell to wall: 41.5 mm
 H2C conservative part envelope: 300 x 315 x 315 mm
+Largest H2C part: 295.62 x 210.45 x 74.30 mm
+
+Approximate photo-derived visible stand bay: 145.5–149.3 mm wide x ~150.9 mm high. This is a photographic cross-check, not a dimensioned Dell specification.
